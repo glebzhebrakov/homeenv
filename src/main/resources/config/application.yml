@@ -5,7 +5,13 @@ liquibase:
   change-log: classpath:db/changelog/changelog-master.xml
 
 spring:
+  session:
+    store-type: none
   datasource:
     url: jdbc:postgresql://localhost:5432/homeenv
     username: homeenv
     password: homeenv
+#logging:
+#  level:
+#    ROOT: DEBUG
+#
