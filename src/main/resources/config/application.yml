@@ -1,0 +1,11 @@
+liquibase:
+  user: homeenv
+  password: homeenv
+  url: jdbc:postgresql://localhost:5432/homeenv
+  change-log: classpath:db/changelog/changelog-master.xml
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/homeenv
+    username: homeenv
+    password: homeenv
