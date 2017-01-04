@@ -11,7 +11,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/homeenv
     username: homeenv
     password: homeenv
-#logging:
-#  level:
-#    ROOT: DEBUG
+logging:
+  level:
+    ROOT: DEBUG
 #
