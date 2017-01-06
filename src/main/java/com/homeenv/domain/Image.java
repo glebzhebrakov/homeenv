@@ -1,9 +1,11 @@
 package com.homeenv.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+
+import org.springframework.data.annotation.Id;
+
+
+import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -11,12 +13,19 @@ import java.util.Set;
 public class Image {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String path;
     private Boolean indexed;
+    private String hash;
+    private String mime;
 
     @OneToMany
     private Set<ImageAttribute> attributes;
+
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "image_id")
+    private Set<ImageDuplicate> duplicates;
 
     public Long getId() {
         return id;
@@ -48,5 +57,57 @@ public class Image {
 
     public void setAttributes(Set<ImageAttribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public String getMime() {
+        return mime;
+    }
+
+    public void setMime(String mime) {
+        this.mime = mime;
+    }
+
+    public Image withHash(String hash){
+        setHash(hash);
+        return this;
+    }
+
+    public Image withPath(String path){
+        setPath(path);
+        return this;
+    }
+
+    public Image withIndexed(Boolean indexed){
+        setIndexed(indexed);
+        return this;
+    }
+
+    public Image withMime(String mime){
+        setMime(mime);
+        return this;
+    }
+
+    public void addDuplicate(ImageDuplicate duplicate){
+        if (duplicates == null){
+            duplicates = new HashSet<>();
+        }
+
+        duplicates.add(duplicate);
+    }
+
+    public Set<ImageDuplicate> getDuplicates() {
+        return duplicates;
+    }
+
+    public void setDuplicates(Set<ImageDuplicate> duplicates) {
+        this.duplicates = duplicates;
     }
 }

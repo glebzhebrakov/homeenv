@@ -1,0 +1,53 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="gleb" id="20170501-2230">
+        <sql>
+            CREATE SEQUENCE hibernate_sequence
+            START 1;
+        </sql>
+    </changeSet>
+
+    <changeSet author="gleb" id="20170501-2231">
+        <comment>
+            Tables for image and attributes
+        </comment>
+        <sql>
+            CREATE TABLE image
+            (
+            id SERIAL PRIMARY KEY,
+            path TEXT NOT NULL,
+            indexed BOOLEAN DEFAULT FALSE  NOT NULL
+            );
+            CREATE UNIQUE INDEX image_id_uindex ON public.image (id);
+        </sql>
+
+    </changeSet>
+
+    <changeSet author="gleb" id="20170501-2245">
+        <comment>
+            Tables for image attributes
+        </comment>
+        <sql>
+
+            CREATE TABLE image_attribute
+            (
+            id SERIAL PRIMARY KEY NOT NULL,
+            image_id BIGINT NOT NULL,
+            name TEXT,
+            value TEXT,
+            CONSTRAINT image_attributes_image_id_fk FOREIGN KEY (image_id) REFERENCES image (id) ON DELETE CASCADE ON UPDATE CASCADE
+            );
+            CREATE UNIQUE INDEX image_attribute_id_uindex ON image_attribute (id);
+        </sql>
+
+    </changeSet>
+
+
+</databaseChangeLog>

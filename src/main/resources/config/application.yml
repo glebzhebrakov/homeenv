@@ -11,7 +11,19 @@ spring:
     url: jdbc:postgresql://localhost:5432/homeenv
     username: homeenv
     password: homeenv
-logging:
-  level:
-    ROOT: DEBUG
+
+
+security:
+  basic:
+    enabled: false
+
+homeenv:
+  indexing:
+    path: "/home/gzhebrakov/Pictures"
+    recursive: true
+
+
+#logging:
+#  level:
+#    ROOT: DEBUG
 #

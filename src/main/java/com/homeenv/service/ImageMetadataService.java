@@ -5,13 +5,107 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+import com.homeenv.config.ApplicationProperties;
+import com.homeenv.domain.Image;
+import com.homeenv.domain.ImageDuplicate;
+import com.homeenv.repository.ImageRepository;
+import net.sf.jmimemagic.Magic;
+import net.sf.jmimemagic.MagicException;
+import net.sf.jmimemagic.MagicMatchNotFoundException;
+import net.sf.jmimemagic.MagicParseException;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MimeTypeUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.*;
+
+import static jersey.repackaged.com.google.common.base.Preconditions.checkArgument;
 
 @Service
 public class ImageMetadataService {
+
+    private Logger log = LoggerFactory.getLogger(ImageMetadataService.class);
+
+    private final ApplicationProperties applicationProperties;
+
+    private final ImageRepository imageRepository;
+
+    @Autowired
+    public ImageMetadataService(ApplicationProperties applicationProperties,
+                                ImageRepository imageRepository) {
+        this.applicationProperties = applicationProperties;
+        this.imageRepository = imageRepository;
+    }
+
+    public void indexStorage(){
+        Collection<File> files = FileUtils.listFiles(new File(applicationProperties.getIndexing().getPath()),
+                null,
+                applicationProperties.getIndexing().getRecursive());
+
+        Map<String, Image> indexedImages = new HashMap<>();
+        files.forEach(file -> detectMimeType(file).ifPresent(mime -> {
+          if (mime.startsWith("image")){
+
+              calculateHash(file).ifPresent(hash -> {
+                    Image maybeIndexedImage = indexedImages.get(hash);
+
+                    if (maybeIndexedImage == null){
+                        indexedImages.put(hash,
+                                new Image()
+                                        .withPath(file.getAbsolutePath())
+                                        .withHash(hash.toString())
+                                        .withMime(mime)
+                                        .withIndexed(true)
+                        );
+                    } else {
+                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
+                    }
+
+              });
+          }
+        }));
+
+        indexedImages.values().forEach(this::saveImage);
+    }
+
+    @Transactional
+    private void saveImage(Image image){
+        try {
+            imageRepository.save(image);
+        } catch (Exception e){
+            log.warn("unable to save image " + e.getMessage());
+        }
+    }
+
+    private Optional<String> calculateHash(File file){
+        try {
+            return Optional.of(Files.hash(file, Hashing.md5()).toString());
+        } catch (IOException e) {
+            log.error("unable to calculate hash code " + file.getAbsolutePath(), e);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> detectMimeType(File file){
+        try {
+            return Optional.of(Magic.getMagicMatch(FileUtils.readFileToByteArray(file), false).getMimeType());
+        } catch (MagicException | IOException | MagicParseException | MagicMatchNotFoundException e) {
+            log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
+        }
+
+        return Optional.empty();
+    }
 
     public void extractMetadata(String path)  {
         Metadata metadata = null;

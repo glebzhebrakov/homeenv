@@ -1,0 +1,53 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="gleb" id="20170601-1551">
+        <comment>
+           Add hash column to image
+        </comment>
+        <sql>
+            ALTER TABLE image ADD COLUMN hash TEXT UNIQUE NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE image DROP COLUMN hash;
+        </rollback>
+
+    </changeSet>
+
+    <changeSet author="gleb" id="20170601-1636">
+        <comment>
+            Add mime column to image
+        </comment>
+        <sql>
+            ALTER TABLE image ADD COLUMN mime TEXT NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE image DROP COLUMN mime;
+        </rollback>
+
+    </changeSet>
+
+    <changeSet author="gleb" id="20170601-1700">
+        <comment>
+            Add image duplicates table
+        </comment>
+        <sql>
+            CREATE TABLE image_duplicate
+            (
+            id SERIAL PRIMARY KEY NOT NULL,
+            image_id BIGINT NOT NULL,
+            path TEXT NOT NULL,
+            CONSTRAINT image_duplicates_image_id_fk FOREIGN KEY (image_id) REFERENCES image (id) ON DELETE CASCADE ON UPDATE CASCADE
+            );
+        </sql>
+
+    </changeSet>
+
+
+</databaseChangeLog>

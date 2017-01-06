@@ -7,39 +7,7 @@
    http://www.liquibase.org/xml/ns/dbchangelog
    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet author="gleb" id="02012017-2231">
-        <comment>
-            Tables for image and attributes
-        </comment>
-        <sql>
-            CREATE TABLE image
-            (
-                id SERIAL PRIMARY KEY,
-                path VARCHAR(255) NOT NULL,
-                indexed BOOLEAN DEFAULT FALSE  NOT NULL
-            );
-            CREATE UNIQUE INDEX image_id_uindex ON public.image (id);
-        </sql>
-
-    </changeSet>
-
-    <changeSet author="gleb" id="02012017-2245">
-        <comment>
-            Tables for image attributes
-        </comment>
-        <sql>
-
-            CREATE TABLE image_attribute
-            (
-                id SERIAL PRIMARY KEY NOT NULL,
-                image_id INT NOT NULL,
-                name TEXT,
-                value TEXT,
-                CONSTRAINT image_attributes_image_id_fk FOREIGN KEY (image_id) REFERENCES image (id) ON DELETE CASCADE ON UPDATE CASCADE
-            );
-            CREATE UNIQUE INDEX image_attribute_id_uindex ON image_attribute (id);
-        </sql>
-
-    </changeSet>
+    <include relativeToChangelogFile="true" file="updates-20170105.xml"/>
+    <include relativeToChangelogFile="true" file="updates-20170106.xml"/>
 
 </databaseChangeLog>
