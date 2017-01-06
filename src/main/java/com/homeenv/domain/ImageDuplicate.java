@@ -11,8 +11,8 @@ public class ImageDuplicate {
     private Long id;
     private String path;
 
-    @ManyToOne (fetch = FetchType.LAZY)
-//    @JoinColumn (name = "image_id")
+    @ManyToOne
+    @JoinColumn (name = "image_id")
     private Image image;
 
 

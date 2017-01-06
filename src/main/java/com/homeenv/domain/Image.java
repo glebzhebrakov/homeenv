@@ -20,8 +20,7 @@ public class Image {
     @OneToMany
     private Set<ImageAttribute> attributes;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
-//    @JoinColumn(name = "image_id")
+    @Transient
     private Set<ImageDuplicate> duplicates;
 
     public Long getId() {

@@ -5,12 +5,12 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
-import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
 import com.homeenv.domain.ImageDuplicate;
+import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicException;
@@ -22,15 +22,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MimeTypeUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
-
-import static jersey.repackaged.com.google.common.base.Preconditions.checkArgument;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ImageMetadataService {
@@ -41,11 +39,15 @@ public class ImageMetadataService {
 
     private final ImageRepository imageRepository;
 
+    private final ImageDuplicateRepository imageDuplicateRepository;
+
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,
-                                ImageRepository imageRepository) {
+                                ImageRepository imageRepository,
+                                ImageDuplicateRepository imageDuplicateRepository) {
         this.applicationProperties = applicationProperties;
         this.imageRepository = imageRepository;
+        this.imageDuplicateRepository = imageDuplicateRepository;
     }
 
     public void indexStorage(){
@@ -82,7 +84,9 @@ public class ImageMetadataService {
     @Transactional
     private void saveImage(Image image){
         try {
-            imageRepository.save(image);
+            Image img = imageRepository.save(image);
+            image.getDuplicates().forEach(imageDuplicate -> imageDuplicate.setImage(img));
+            imageDuplicateRepository.save(image.getDuplicates());
         } catch (Exception e){
             log.warn("unable to save image " + e.getMessage());
         }

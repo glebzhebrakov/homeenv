@@ -19,7 +19,7 @@ security:
 
 homeenv:
   indexing:
-    path: "/home/gzhebrakov/Pictures"
+    path: "/home/dominator/test"
     recursive: true
 
 
