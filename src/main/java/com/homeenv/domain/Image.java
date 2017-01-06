@@ -1,9 +1,6 @@
 package com.homeenv.domain;
 
 
-import org.springframework.data.annotation.Id;
-
-
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +21,7 @@ public class Image {
     private Set<ImageAttribute> attributes;
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "image_id")
+//    @JoinColumn(name = "image_id")
     private Set<ImageDuplicate> duplicates;
 
     public Long getId() {

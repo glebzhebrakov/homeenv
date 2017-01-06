@@ -11,6 +11,11 @@ public class ImageDuplicate {
     private Long id;
     private String path;
 
+    @ManyToOne (fetch = FetchType.LAZY)
+//    @JoinColumn (name = "image_id")
+    private Image image;
+
+
     public ImageDuplicate() {
 
     }
@@ -33,5 +38,13 @@ public class ImageDuplicate {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
     }
 }
