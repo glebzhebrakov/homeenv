@@ -3,13 +3,13 @@ package com.homeenv.service;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.lang.GeoLocation;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.exif.GpsDirectory;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
-import com.homeenv.domain.ImageDuplicate;
 import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
 import net.sf.jmimemagic.Magic;
@@ -63,15 +63,16 @@ public class ImageMetadataService {
                     Image maybeIndexedImage = indexedImages.get(hash);
 
                     if (maybeIndexedImage == null){
-                        indexedImages.put(hash,
-                                new Image()
-                                        .withPath(file.getAbsolutePath())
-                                        .withHash(hash.toString())
-                                        .withMime(mime)
-                                        .withIndexed(true)
-                        );
+//                        indexedImages.put(hash,
+//                                new Image()
+//                                        .withPath(file.getAbsolutePath())
+//                                        .withHash(hash.toString())
+//                                        .withMime(mime)
+//                                        .withIndexed(true)
+//                        );
+                        extractMetadata(file);
                     } else {
-                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
+//                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
                     }
 
               });
@@ -82,7 +83,7 @@ public class ImageMetadataService {
     }
 
     @Transactional
-    private void saveImage(Image image){
+    private void saveImage(final Image image){
         try {
             Image img = imageRepository.save(image);
             image.getDuplicates().forEach(imageDuplicate -> imageDuplicate.setImage(img));
@@ -111,6 +112,27 @@ public class ImageMetadataService {
         return Optional.empty();
     }
 
+    private void extractMetadata(File file){
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(file);
+            Collection<GpsDirectory> gpsDirectories = metadata.getDirectoriesOfType(GpsDirectory.class);
+            if (gpsDirectories!= null){
+                gpsDirectories.forEach(gpsDirectory -> {
+                    GeoLocation geoLocation = gpsDirectory.getGeoLocation();
+                    if (geoLocation != null && !geoLocation.isZero()) {
+                        System.out.println(geoLocation);
+                    }
+                });
+
+            }
+            metadata.getDirectories().forEach(directory -> directory.getTags().forEach(tag -> {
+                System.out.println(tag);
+            }));
+        } catch (Throwable e) {
+            log.error("unable extract metadata from file " + file.getAbsolutePath(), e);
+        }
+    }
+
     public void extractMetadata(String path)  {
         Metadata metadata = null;
         try {
@@ -122,8 +144,8 @@ public class ImageMetadataService {
             }));
 
             // obtain the Exif directory
-            ExifSubIFDDirectory directory
-                    = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+            GpsDirectory directory
+                    = metadata.getFirstDirectoryOfType(GpsDirectory.class);
 
 // query the tag's value
 //            System.out.println(directory.getInteger(ExifSubIFDDirectory.TAG_IMAGE_WIDTH));
