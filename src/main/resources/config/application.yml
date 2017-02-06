@@ -5,6 +5,10 @@ liquibase:
   change-log: classpath:db/changelog/changelog-master.xml
 
 spring:
+  application:
+    name: homeenv
+  config:
+    name: homeenv
   session:
     store-type: none
   datasource:
@@ -22,6 +26,12 @@ homeenv:
     path: "/home/dominator/test"
     recursive: true
 
+eureka:
+  client:
+    lease:
+      duration: 5
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 
 #logging:
 #  level:
