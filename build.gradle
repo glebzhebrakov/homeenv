@@ -58,7 +58,8 @@ dependencies {
 
 	compile group: 'jmimemagic', name: 'jmimemagic', version: '0.1.2'
 //	providedRuntime group: 'com.adobe.xmp', name: 'xmpcore', version: '6.1.10'
-
+	compile("org.springframework.boot:spring-boot-starter-amqp")
+	compile("org.springframework.boot:spring-boot-configuration-processor")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
 }

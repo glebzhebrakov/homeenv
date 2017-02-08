@@ -15,6 +15,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/homeenv
     username: homeenv
     password: homeenv
+  rabbitmq:
+#   user: homeenv
+#   password: homeenv
+   host: localhost
+   port: 5672
+#   virtual-host: homeenv
 
 
 security:
@@ -25,6 +31,11 @@ homeenv:
   indexing:
     path: "/home/dominator/test"
     recursive: true
+
+  rabbit:
+    queueIndexingRequests: indexing_requests
+    queueIndexingResponses: indexing_responses
+    exchangeName: homeenv
 
 eureka:
   client:
