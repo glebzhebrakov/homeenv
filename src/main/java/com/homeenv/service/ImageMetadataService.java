@@ -92,22 +92,16 @@ public class ImageMetadataService {
               });
           }
         }));
-
-        indexedImages.values().forEach(image -> {
-            saveImage(image);
-            messagingService.sendIndexingRequest(new IndexingRequest(
-                    image.getPath(),
-                    image.getHash()
-            ));
-        });
     }
 
     @Transactional
     private void saveImage(final Image image){
         try {
             Image img = imageRepository.save(image);
-            image.getDuplicates().forEach(imageDuplicate -> imageDuplicate.setImage(img));
-            imageDuplicateRepository.save(image.getDuplicates());
+            if (image.getDuplicates() != null){
+                image.getDuplicates().forEach(imageDuplicate -> imageDuplicate.setImage(img));
+                imageDuplicateRepository.save(image.getDuplicates());
+            }
         } catch (Exception e){
             log.warn("unable to save image " + e.getMessage());
         }
