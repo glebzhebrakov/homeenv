@@ -30,7 +30,7 @@ public class IndexingResource {
     )
     public ResponseEntity<Void> indexMetadata(){
 //        metadataService.indexStorage();
-            messagingService.sendIndexingRequest(new IndexingRequest("test"));
+            messagingService.sendIndexingRequest(new IndexingRequest("/home/dominator/Pictures/3FP3IZvhOPo.jpg"));
 
         return ResponseEntity.ok().build();
     }
