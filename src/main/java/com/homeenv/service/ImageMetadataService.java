@@ -69,19 +69,25 @@ public class ImageMetadataService {
                     Image maybeIndexedImage = indexedImages.get(hash);
 
                     if (maybeIndexedImage == null){
-                        Image img = new Image()
+                        maybeIndexedImage = new Image()
                                 .withPath(file.getAbsolutePath())
                                 .withHash(hash)
                                 .withMime(mime)
                                 .withIndexed(false);
 
-                        indexedImages.put(hash, img);
-                        log.info("#### Indexing : " + img.getPath());
+                        indexedImages.put(hash, maybeIndexedImage);
+                        log.info("#### Indexing : " + maybeIndexedImage.getPath());
 //                        extractMetadata(file);
                     } else {
                         log.info(String.format("### Found duplicates : \n original  %s , \n duplicate %s", maybeIndexedImage.getPath(), file.getAbsolutePath()));
                         maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
                     }
+
+                  saveImage(maybeIndexedImage);
+                  messagingService.sendIndexingRequest(new IndexingRequest(
+                          maybeIndexedImage.getPath(),
+                          maybeIndexedImage.getHash()
+                  ));
 
               });
           }
