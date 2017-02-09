@@ -1,0 +1,30 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="gleb" id="20170901-2236">
+        <comment>
+            Add classification result table
+        </comment>
+        <sql>
+            CREATE TABLE image_classifications
+            (
+            id SERIAL PRIMARY KEY NOT NULL,
+            image_id BIGINT NOT NULL,
+            classes TEXT NOT NULL,
+            score float NOT NULL,
+            CONSTRAINT image_classifications_image_id_fk FOREIGN KEY (image_id) REFERENCES image (id) ON DELETE CASCADE ON UPDATE CASCADE
+            );
+        </sql>
+        <rollback>
+            DROP TABLE image_classifications;
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

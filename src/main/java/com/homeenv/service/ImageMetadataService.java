@@ -10,6 +10,8 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
+import com.homeenv.domain.ImageDuplicate;
+import com.homeenv.messaging.IndexingRequest;
 import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
 import net.sf.jmimemagic.Magic;
@@ -41,13 +43,17 @@ public class ImageMetadataService {
 
     private final ImageDuplicateRepository imageDuplicateRepository;
 
+    private final MessagingService messagingService;
+
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,
                                 ImageRepository imageRepository,
-                                ImageDuplicateRepository imageDuplicateRepository) {
+                                ImageDuplicateRepository imageDuplicateRepository,
+                                MessagingService messagingService) {
         this.applicationProperties = applicationProperties;
         this.imageRepository = imageRepository;
         this.imageDuplicateRepository = imageDuplicateRepository;
+        this.messagingService = messagingService;
     }
 
     public void indexStorage(){
@@ -63,23 +69,30 @@ public class ImageMetadataService {
                     Image maybeIndexedImage = indexedImages.get(hash);
 
                     if (maybeIndexedImage == null){
-//                        indexedImages.put(hash,
-//                                new Image()
-//                                        .withPath(file.getAbsolutePath())
-//                                        .withHash(hash.toString())
-//                                        .withMime(mime)
-//                                        .withIndexed(true)
-//                        );
-                        extractMetadata(file);
+                        Image img = new Image()
+                                .withPath(file.getAbsolutePath())
+                                .withHash(hash)
+                                .withMime(mime)
+                                .withIndexed(false);
+
+                        indexedImages.put(hash, img);
+
+//                        extractMetadata(file);
                     } else {
-//                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
+                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
                     }
 
               });
           }
         }));
 
-        indexedImages.values().forEach(this::saveImage);
+        indexedImages.values().forEach(image -> {
+            saveImage(image);
+            messagingService.sendIndexingRequest(new IndexingRequest(
+                    image.getPath(),
+                    image.getHash()
+            ));
+        });
     }
 
     @Transactional

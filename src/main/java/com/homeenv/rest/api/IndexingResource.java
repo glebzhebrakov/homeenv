@@ -1,7 +1,6 @@
 package com.homeenv.rest.api;
 
 import com.homeenv.Constants;
-import com.homeenv.messaging.IndexingRequest;
 import com.homeenv.service.ImageMetadataService;
 import com.homeenv.service.MessagingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,7 @@ public class IndexingResource {
             method = RequestMethod.GET
     )
     public ResponseEntity<Void> indexMetadata(){
-//        metadataService.indexStorage();
-            messagingService.sendIndexingRequest(new IndexingRequest("/home/dominator/Pictures/test.jpg"));
-
+        metadataService.indexStorage();
         return ResponseEntity.ok().build();
     }
 }

@@ -1,11 +1,9 @@
 package com.homeenv.config;
 
 import com.homeenv.messaging.IndexingResponsesReceiver;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
+import com.homeenv.repository.ImageClassificationRepository;
+import com.homeenv.repository.ImageRepository;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -24,6 +22,11 @@ public class RabbitConfig {
     @Autowired
     private ConnectionFactory connectionFactory;
 
+    @Autowired
+    private ImageRepository imageRepository;
+
+    @Autowired
+    private ImageClassificationRepository imageClassificationRepository;
 
     @Bean(name = "indexingRequestsQueue")
     Queue indexingRequestsQueue() {
@@ -65,7 +68,7 @@ public class RabbitConfig {
 
     @Bean
     IndexingResponsesReceiver receiver(RabbitTemplate rabbitTemplate) {
-        return new IndexingResponsesReceiver(rabbitTemplate, applicationProperties);
+        return new IndexingResponsesReceiver(rabbitTemplate, applicationProperties, imageRepository, imageClassificationRepository);
     }
 
     @Bean

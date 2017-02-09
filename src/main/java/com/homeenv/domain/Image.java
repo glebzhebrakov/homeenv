@@ -21,6 +21,9 @@ public class Image {
     private Set<ImageAttribute> attributes;
 
     @Transient
+    private Set<ImageClassification> imageClassifications;
+
+    @Transient
     private Set<ImageDuplicate> duplicates;
 
     public Long getId() {
@@ -105,5 +108,13 @@ public class Image {
 
     public void setDuplicates(Set<ImageDuplicate> duplicates) {
         this.duplicates = duplicates;
+    }
+
+    public Set<ImageClassification> getImageClassifications() {
+        return imageClassifications;
+    }
+
+    public void setImageClassifications(Set<ImageClassification> imageClassifications) {
+        this.imageClassifications = imageClassifications;
     }
 }
