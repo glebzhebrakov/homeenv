@@ -76,9 +76,10 @@ public class ImageMetadataService {
                                 .withIndexed(false);
 
                         indexedImages.put(hash, img);
-
+                        log.info("#### Indexing : " + img.getPath());
 //                        extractMetadata(file);
                     } else {
+                        log.info(String.format("### Found duplicates : \n original  %s , \n duplicate %s", maybeIndexedImage.getPath(), file.getAbsolutePath()));
                         maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
                     }
 
