@@ -63,7 +63,7 @@ public class ImageMetadataService {
           if (mime.startsWith("image")){
 
               calculateHash(file).ifPresent(hash -> {
-                    Image maybeIndexedImage = indexedImages.get(hash);
+                  Image maybeIndexedImage = imageRepository.findByHash(hash).orElse(null);
 
                     if (maybeIndexedImage == null){
                         maybeIndexedImage = new Image()
@@ -72,7 +72,6 @@ public class ImageMetadataService {
                                 .withMime(mime)
                                 .withIndexed(false);
 
-                        indexedImages.put(hash, maybeIndexedImage);
                         log.info("#### Indexing : " + maybeIndexedImage.getPath());
 
                         messagingService.sendIndexingRequest(new IndexingRequest(
