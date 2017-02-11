@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 @Component
 public class IndexingResponsesReceiver {
 
@@ -37,14 +39,33 @@ public class IndexingResponsesReceiver {
         try {
             Gson gson = new Gson();
             IndexingResponse response = gson.fromJson(new String((byte[]) message), IndexingResponse.class);
-
+            log.info("Classified: " + response.getPath());
             imageRepository.findByHash(response.getHash()).ifPresent(image -> {
-                Set<ImageClassification> classifications = new HashSet<>(response.getClassificationResult().size());
-                response.getClassificationResult().forEach((key, value) -> classifications.add(new ImageClassification(image, key, Float.valueOf(value))));
-                imageClassificationRepository.save(classifications);
-                image.setIndexed(true);
-                imageRepository.save(image);
+
+                if (isNotBlank(response.getError()) || response.getClassificationResult() == null){
+                    log.info(String.format("Indexing error : %s ", response.getError()));
+
+                    if (isNotBlank(response.getError())){
+                        image.setError(response.getError());
+                    } else {
+                        image.setError("Empty error and classification result");
+                    }
+
+                    imageRepository.save(image);
+
+                } else {
+                    Set<ImageClassification> classifications = new HashSet<>(response.getClassificationResult().size());
+                    response.getClassificationResult().forEach((key, value) -> classifications.add(new ImageClassification(image, key, Float.valueOf(value))));
+                    if (!classifications.isEmpty()){
+                        imageClassificationRepository.save(classifications);
+                        image.setIndexed(true);
+                        imageRepository.save(image);
+                    }
+                }
+
+
             });
+
         } catch (Exception e){
             log.error("unable to save classification result", e);
         }

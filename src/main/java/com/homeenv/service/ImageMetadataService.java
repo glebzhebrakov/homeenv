@@ -15,9 +15,6 @@ import com.homeenv.messaging.IndexingRequest;
 import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
 import net.sf.jmimemagic.Magic;
-import net.sf.jmimemagic.MagicException;
-import net.sf.jmimemagic.MagicMatchNotFoundException;
-import net.sf.jmimemagic.MagicParseException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +74,11 @@ public class ImageMetadataService {
 
                         indexedImages.put(hash, maybeIndexedImage);
                         log.info("#### Indexing : " + maybeIndexedImage.getPath());
+
+                        messagingService.sendIndexingRequest(new IndexingRequest(
+                                maybeIndexedImage.getPath(),
+                                maybeIndexedImage.getHash()
+                        ));
 //                        extractMetadata(file);
                     } else {
                         log.info(String.format("### Found duplicates : \n original  %s , \n duplicate %s", maybeIndexedImage.getPath(), file.getAbsolutePath()));
@@ -84,13 +86,11 @@ public class ImageMetadataService {
                     }
 
                   saveImage(maybeIndexedImage);
-                  messagingService.sendIndexingRequest(new IndexingRequest(
-                          maybeIndexedImage.getPath(),
-                          maybeIndexedImage.getHash()
-                  ));
 
               });
           }
+
+
         }));
     }
 
@@ -119,7 +119,7 @@ public class ImageMetadataService {
     private Optional<String> detectMimeType(File file){
         try {
             return Optional.of(Magic.getMagicMatch(FileUtils.readFileToByteArray(file), false).getMimeType());
-        } catch (MagicException | IOException | MagicParseException | MagicMatchNotFoundException e) {
+        } catch (Exception e) {
             log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
         }
 

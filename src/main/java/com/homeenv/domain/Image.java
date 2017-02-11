@@ -16,6 +16,7 @@ public class Image {
     private Boolean indexed;
     private String hash;
     private String mime;
+    private String error;
 
     @OneToMany
     private Set<ImageAttribute> attributes;
@@ -116,5 +117,13 @@ public class Image {
 
     public void setImageClassifications(Set<ImageClassification> imageClassifications) {
         this.imageClassifications = imageClassifications;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }

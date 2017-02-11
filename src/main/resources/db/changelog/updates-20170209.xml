@@ -27,4 +27,16 @@
 
     </changeSet>
 
+    <changeSet author="gleb" id="20171102-1937">
+        <comment>
+            Add classification error string to image
+        </comment>
+        <sql>
+            ALTER TABLE image ADD COLUMN error TEXT DEFAULT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE image DROP COLUMN error;
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

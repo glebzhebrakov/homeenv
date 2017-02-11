@@ -5,6 +5,8 @@ import java.util.Map;
 public class IndexingResponse {
     private String path;
     private String hash;
+    private String error;
+
     private Map<String, String> classificationResult;
 
     public String getPath() {
@@ -29,5 +31,13 @@ public class IndexingResponse {
 
     public void setClassificationResult(Map<String, String> classificationResult) {
         this.classificationResult = classificationResult;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 }
