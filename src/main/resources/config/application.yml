@@ -44,7 +44,8 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
 
-#logging:
+logging:
+  file: homeenv.log
 #  level:
 #    ROOT: DEBUG
 #
