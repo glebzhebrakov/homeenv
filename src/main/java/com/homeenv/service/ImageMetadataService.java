@@ -14,7 +14,6 @@ import com.homeenv.domain.ImageDuplicate;
 import com.homeenv.messaging.IndexingRequest;
 import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
-import net.sf.jmimemagic.Magic;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +116,7 @@ public class ImageMetadataService {
 
     private Optional<String> detectMimeType(File file){
         try {
-            return Optional.of(Magic.getMagicMatch(FileUtils.readFileToByteArray(file), false).getMimeType());
+            return Optional.of(java.nio.file.Files.probeContentType(file.toPath()));
         } catch (Exception e) {
             log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
         }
