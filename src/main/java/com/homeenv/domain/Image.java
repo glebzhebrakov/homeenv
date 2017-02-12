@@ -21,7 +21,7 @@ public class Image {
     @OneToMany
     private Set<ImageAttribute> attributes;
 
-    @Transient
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageClassification> imageClassifications;
 
     @Transient

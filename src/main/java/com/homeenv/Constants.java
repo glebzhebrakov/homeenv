@@ -7,5 +7,9 @@ public interface Constants {
         interface Indexing{
             String INDEX_METADATA = REST_API_PREFIX +"/indexing/metadata";
         }
+
+        interface Classification{
+            String CLASSIFICATIONS_ALL = REST_API_PREFIX +"/classifications/all";
+        }
     }
 }

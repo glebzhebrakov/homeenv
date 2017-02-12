@@ -28,7 +28,7 @@ public class IndexingResource {
             method = RequestMethod.GET
     )
     public ResponseEntity<Void> indexMetadata(){
-        metadataService.indexStorage();
+       // metadataService.indexStorage();
         return ResponseEntity.ok().build();
     }
 }
