@@ -24,7 +24,7 @@ public class Image {
     @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageClassification> imageClassifications;
 
-    @Transient
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageDuplicate> duplicates;
 
     public Long getId() {
