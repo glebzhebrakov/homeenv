@@ -23,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ImageMetadataService {
@@ -63,7 +60,7 @@ public class ImageMetadataService {
 
               calculateHash(file).ifPresent(hash -> {
                   Image maybeIndexedImage = imageRepository.findByHash(hash).orElse(null);
-
+                  Set<ImageDuplicate> duplicates = new HashSet<>();
                     if (maybeIndexedImage == null){
                         maybeIndexedImage = new Image()
                                 .withPath(file.getAbsolutePath())
@@ -80,10 +77,10 @@ public class ImageMetadataService {
 //                        extractMetadata(file);
                     } else {
                         log.info(String.format("### Found duplicates : \n original  %s , \n duplicate %s", maybeIndexedImage.getPath(), file.getAbsolutePath()));
-                        maybeIndexedImage.addDuplicate(new ImageDuplicate(file.getAbsolutePath()));
+                        duplicates.add(new ImageDuplicate(file.getAbsolutePath()));
                     }
 
-                  saveImage(maybeIndexedImage);
+                  saveImage(maybeIndexedImage, duplicates);
 
               });
           }
@@ -93,12 +90,12 @@ public class ImageMetadataService {
     }
 
     @Transactional
-    private void saveImage(final Image image){
+    private void saveImage(final Image image, final Set<ImageDuplicate> duplicates){
         try {
             Image img = imageRepository.save(image);
-            if (image.getDuplicates() != null){
-                image.getDuplicates().forEach(imageDuplicate -> imageDuplicate.setImage(img));
-                imageDuplicateRepository.save(image.getDuplicates());
+            if (duplicates != null){
+                duplicates.forEach(imageDuplicate -> imageDuplicate.setImage(img));
+                imageDuplicateRepository.save(duplicates);
             }
         } catch (Exception e){
             log.warn("unable to save image " + e.getMessage());
