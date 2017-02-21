@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,19 @@ public class ClassifiedImagesResource {
     )
     public ResponseEntity<List<ClassifiedImageDTO>> findAllClassified(){
         return new ResponseEntity<>(classificationService.findAllClassified()
+                .stream()
+                .map(ClassifiedImageDTO::new)
+                .collect(Collectors.toList()), HttpStatus.OK
+        );
+    }
+
+    @RequestMapping(
+            value = Constants.RestApi.Classification.CLASSIFICATIONS,
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<ClassifiedImageDTO>> findClassified(@PathVariable(name = "from") Integer from, @PathVariable(name = "to") Integer to){
+        return new ResponseEntity<>(classificationService.findClassified(from, to)
                 .stream()
                 .map(ClassifiedImageDTO::new)
                 .collect(Collectors.toList()), HttpStatus.OK
