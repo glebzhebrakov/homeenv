@@ -69,6 +69,21 @@ public class ClassifiedImagesResource {
     }
 
     @RequestMapping(
+            value = Constants.RestApi.Classification.CLASSIFICATIONS_BY_CLASS_ALL,
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<ClassifiedImageDTO>> findClassifiedAll(
+            @PathVariable(name = "class") String cls)
+    {
+        return new ResponseEntity<>(classificationService.findClassifiedByClass(cls)
+                .stream()
+                .map(ClassifiedImageDTO::new)
+                .collect(Collectors.toList()), HttpStatus.OK
+        );
+    }
+
+    @RequestMapping(
             value = Constants.RestApi.Classification.CLASSES,
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE

@@ -12,6 +12,7 @@ public interface Constants {
             String CLASSIFICATIONS_ALL = REST_API_PREFIX +"/classifications/all";
             String CLASSIFICATIONS = REST_API_PREFIX +"/classifications/{from}/{to}";
             String CLASSIFICATIONS_BY_CLASS = REST_API_PREFIX +"/classifications/{class}/{from}/{to}";
+            String CLASSIFICATIONS_BY_CLASS_ALL = REST_API_PREFIX +"/classifications/all/{class}";
             String CLASSES = REST_API_PREFIX+"/classes";
         }
     }

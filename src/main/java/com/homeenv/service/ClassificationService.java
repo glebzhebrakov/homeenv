@@ -43,6 +43,10 @@ public class ClassificationService {
         return imageRepository.findClassifiedPageableByClass(cls,new PageRequest(from, to)).getContent();
     }
 
+    public List<Image> findClassifiedByClass(String cls){
+        return imageRepository.findClassifiedPageableByClass(cls);
+    }
+
     public List<String> findClassifications(){
         List<String> rawClasses = new ArrayList<>();
         imageClassesRepository

@@ -15,7 +15,7 @@ public class ImageClassesRepository  {
 
     public List<String> findOrderedPossibleClassifications(){
         return entityManager
-                .createNativeQuery("select classes from image_classifications group by classes ")
+                .createNativeQuery("select classes from (select distinct on(1) image_id, classes, score, id from image_classifications order by image_id, score desc) cls group by classes")
                 .getResultList();
     };
 }
