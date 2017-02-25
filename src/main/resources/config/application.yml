@@ -29,7 +29,7 @@ security:
 
 homeenv:
   indexing:
-    path: "/home/dominator/test"
+    path: "/home/dominator/test2"
     recursive: true
 
   rabbit:
