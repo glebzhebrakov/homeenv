@@ -50,7 +50,7 @@ public class ClassificationService {
                 .forEach(cls -> rawClasses.addAll(Lists.newArrayList(StringUtils.split(cls, ','))));
 
         Collections.sort(rawClasses);
-        return rawClasses.stream().map(cls -> StringUtils.capitalize(cls.trim())).collect(Collectors.toList());
+        return rawClasses.stream().map(String::trim).collect(Collectors.toList());
     }
 }
 
