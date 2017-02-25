@@ -51,5 +51,15 @@ public class ClassifiedImagesResource {
         );
     }
 
+    @RequestMapping(
+            value = Constants.RestApi.Classification.CLASSES,
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<String>> findClasses(){
+        return new ResponseEntity<>(classificationService.findClassifications(), HttpStatus.OK
+        );
+    }
+
 
 }
