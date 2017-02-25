@@ -20,6 +20,6 @@ public interface ImageRepository extends JpaRepository<Image,Long> {
     @Query("from Image img where img.indexed = true")
     Page<Image> findClassifiedPageable(Pageable pageRequest);
 
-    @Query("select img from Image as img right join img.imageClassifications as imgc where imgc.classes like %:cls%")
+    @Query("select img from Image as img right join img.imageClassifications as imgc where imgc.classes like %:cls% and imgc.score >= 0.1")
     Page<Image> findClassifiedPageableByClass(@Param("cls") String cls, Pageable pageRequest);
 }
