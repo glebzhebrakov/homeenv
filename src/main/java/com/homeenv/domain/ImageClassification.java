@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "image_classifications")
-public class ImageClassification {
+public class ImageClassification implements Comparable<ImageClassification> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -61,5 +61,12 @@ public class ImageClassification {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    @Override
+    public int compareTo(ImageClassification imageClassification) {
+        if (this.getScore() < imageClassification.getScore()) return 1;
+        if (this.getScore() > imageClassification.getScore()) return -1;
+        return 0;
     }
 }
