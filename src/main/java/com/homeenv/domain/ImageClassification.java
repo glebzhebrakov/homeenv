@@ -9,7 +9,7 @@ public class ImageClassification implements Comparable<ImageClassification> {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn (name = "image_id")
     private Image image;
 
