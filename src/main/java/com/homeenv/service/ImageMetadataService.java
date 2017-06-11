@@ -1,19 +1,22 @@
 package com.homeenv.service;
 
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.lang.GeoLocation;
+import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.GpsDirectory;
+import com.drew.metadata.file.FileMetadataDirectory;
+import com.drew.metadata.jpeg.JpegDirectory;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
+import com.homeenv.domain.ImageAttribute;
 import com.homeenv.domain.ImageDuplicate;
 import com.homeenv.messaging.IndexingRequest;
+import com.homeenv.repository.ImageAttributeRepository;
 import com.homeenv.repository.ImageDuplicateRepository;
 import com.homeenv.repository.ImageRepository;
+import com.homeenv.util.HomeenvImageMetadataReader;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +39,20 @@ public class ImageMetadataService {
 
     private final ImageDuplicateRepository imageDuplicateRepository;
 
+    private final ImageAttributeRepository imageAttributeRepository;
+
     private final MessagingService messagingService;
 
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,
                                 ImageRepository imageRepository,
                                 ImageDuplicateRepository imageDuplicateRepository,
+                                ImageAttributeRepository imageAttributeRepository,
                                 MessagingService messagingService) {
         this.applicationProperties = applicationProperties;
         this.imageRepository = imageRepository;
         this.imageDuplicateRepository = imageDuplicateRepository;
+        this.imageAttributeRepository = imageAttributeRepository;
         this.messagingService = messagingService;
     }
 
@@ -54,13 +61,13 @@ public class ImageMetadataService {
                 null,
                 applicationProperties.getIndexing().getRecursive());
 
-        Map<String, Image> indexedImages = new HashMap<>();
         files.forEach(file -> detectMimeType(file).ifPresent(mime -> {
           if (mime.startsWith("image")){
 
               calculateHash(file).ifPresent(hash -> {
                   Image maybeIndexedImage = imageRepository.findByHash(hash).orElse(null);
                   Set<ImageDuplicate> duplicates = new HashSet<>();
+                  Set<ImageAttribute> imageAttributes = new HashSet<>();
                     if (maybeIndexedImage == null){
                         maybeIndexedImage = new Image()
                                 .withPath(file.getAbsolutePath())
@@ -74,13 +81,13 @@ public class ImageMetadataService {
                                 maybeIndexedImage.getPath(),
                                 maybeIndexedImage.getHash()
                         ));
-//                        extractMetadata(file);
+                        imageAttributes = extractMetadata(file);
                     } else {
                         log.info(String.format("### Found duplicates : \n original  %s , \n duplicate %s", maybeIndexedImage.getPath(), file.getAbsolutePath()));
                         duplicates.add(new ImageDuplicate(file.getAbsolutePath()));
                     }
 
-                  saveImage(maybeIndexedImage, duplicates);
+                  saveImage(maybeIndexedImage, duplicates, imageAttributes);
 
               });
           }
@@ -90,13 +97,19 @@ public class ImageMetadataService {
     }
 
     @Transactional
-    private void saveImage(final Image image, final Set<ImageDuplicate> duplicates){
+    private void saveImage(final Image image, final Set<ImageDuplicate> duplicates, final Set<ImageAttribute> imageAttributes ){
         try {
             Image img = imageRepository.save(image);
             if (duplicates != null){
                 duplicates.forEach(imageDuplicate -> imageDuplicate.setImage(img));
                 imageDuplicateRepository.save(duplicates);
             }
+
+            if (imageAttributes != null){
+                imageAttributes.forEach(imageAttribute -> imageAttribute.setImage(image));
+                imageAttributeRepository.save(imageAttributes);
+            }
+
         } catch (Exception e){
             log.warn("unable to save image " + e.getMessage());
         }
@@ -121,62 +134,83 @@ public class ImageMetadataService {
         return Optional.empty();
     }
 
-    private void extractMetadata(File file){
+    private Set<ImageAttribute> extractMetadata(File file){
+        Set<ImageAttribute> attributes = new HashSet<>();
         try {
-            Metadata metadata = ImageMetadataReader.readMetadata(file);
-            Collection<GpsDirectory> gpsDirectories = metadata.getDirectoriesOfType(GpsDirectory.class);
-            if (gpsDirectories!= null){
-                gpsDirectories.forEach(gpsDirectory -> {
-                    GeoLocation geoLocation = gpsDirectory.getGeoLocation();
-                    if (geoLocation != null && !geoLocation.isZero()) {
-                        System.out.println(geoLocation);
-                    }
-                });
 
-            }
-            metadata.getDirectories().forEach(directory -> directory.getTags().forEach(tag -> {
-                System.out.println(tag);
-            }));
+            Metadata metadata = HomeenvImageMetadataReader.readMetadata(file);
+            attributes.addAll(extractDirectoryAttributes(metadata, GpsDirectory.class));
+            attributes.addAll(extractDirectoryAttributes(metadata, FileMetadataDirectory.class));
+            attributes.addAll(extractDirectoryAttributes(metadata, JpegDirectory.class));
+
         } catch (Throwable e) {
             log.error("unable extract metadata from file " + file.getAbsolutePath(), e);
         }
+        return attributes;
     }
 
-    public void extractMetadata(String path)  {
-        Metadata metadata = null;
-        try {
-            System.out.println("####################" + path);
-            metadata = ImageMetadataReader.readMetadata(new File(path));
-            metadata.getDirectories().forEach(directory -> directory.getTags().forEach(tag -> {
-//                ExifDirectoryBase
-                tag.getTagType();
-            }));
+    private Set<ImageAttribute> extractDirectoryAttributes(final Metadata metadata, final Class<? extends Directory> dirCls) {
+        Set<ImageAttribute> attributes = new HashSet<>();
+        metadata.getDirectoriesOfType(dirCls)
+                .forEach(directory -> directory.getTags()
+                        .forEach(
+                                tag -> attributes.add(new ImageAttribute(
+                                        tag.getTagName(),
+                                        tag.getDescription())
+                                )
+                        )
+                );
 
-            // obtain the Exif directory
-            GpsDirectory directory
-                    = metadata.getFirstDirectoryOfType(GpsDirectory.class);
-
-// query the tag's value
-//            System.out.println(directory.getInteger(ExifSubIFDDirectory.TAG_IMAGE_WIDTH));
-//            System.out.println(directory.getInteger(ExifSubIFDDirectory.TAG_IMAGE_HEIGHT));
-        } catch (ImageProcessingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        return attributes;
     }
 
-    //TODO split to set of classes
-    private void extractSize(Metadata metadata){
+    @Deprecated
+    private Set<ImageAttribute> extractImageDimension(final Metadata metadata){
+        Set<ImageAttribute> attributes = new HashSet<>();
+        metadata.getDirectoriesOfType(JpegDirectory.class)
+                .forEach(directory -> directory.getTags()
+                        .forEach(
+                                tag -> attributes.add(new ImageAttribute(
+                                        tag.getTagName(),
+                                        tag.getDescription())
+                                )
+                        )
+                );
 
+        return attributes;
     }
 
-    private void extractGeoLocation(Metadata metadata){
 
+    @Deprecated
+    private Set<ImageAttribute> extractFileSize(final Metadata metadata){
+        Set<ImageAttribute> attributes = new HashSet<>();
+        metadata.getDirectoriesOfType(FileMetadataDirectory.class)
+                .forEach(directory -> directory.getTags()
+                        .forEach(
+                                tag -> attributes.add(new ImageAttribute(
+                                        tag.getTagName(),
+                                        tag.getDescription())
+                                )
+                        )
+                );
+
+        return attributes;
     }
 
-    private void extractCameraModel(Metadata metadata){
 
+    @Deprecated
+    private Set<ImageAttribute> extractGeoLocation(final Metadata metadata){
+        Set<ImageAttribute> attributes = new HashSet<>();
+        metadata.getDirectoriesOfType(GpsDirectory.class)
+                .forEach(directory -> directory.getTags()
+                        .forEach(
+                                tag -> attributes.add(new ImageAttribute(
+                                                        tag.getTagName(),
+                                                        tag.getDescription())
+                                )
+                        )
+                );
+
+        return attributes;
     }
 }

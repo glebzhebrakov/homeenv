@@ -18,7 +18,7 @@ public class Image {
     private String mime;
     private String error;
 
-    @OneToMany
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<ImageAttribute> attributes;
 
     @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

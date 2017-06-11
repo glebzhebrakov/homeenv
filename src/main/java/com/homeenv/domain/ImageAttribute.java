@@ -12,6 +12,18 @@ public class ImageAttribute {
     private String name;
     private String value;
 
+    @ManyToOne
+    @JoinColumn (name = "image_id")
+    private Image image;
+
+    public ImageAttribute() {
+    }
+
+    public ImageAttribute(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
     public Long getId() {
         return id;
     }
@@ -34,5 +46,13 @@ public class ImageAttribute {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public Image getImage() {
+        return image;
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
     }
 }
