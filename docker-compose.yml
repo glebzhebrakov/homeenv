@@ -1,11 +1,22 @@
-rabbitmq:
-  image: rabbitmq:management
-  ports:
-    - "5672:5672"
-    - "15672:15672"
+version: "3"
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+        RABBITMQ_DEFAULT_VHOST: /
 
-homeenvcls:
-        image: glebzhebrakov/homeenvcls:latest
-        links:
-            -  rabbitmq
-        entrypoint: ./homeenvcls-entrypoint.sh      
+
+  homeenvcls:
+          image: glebzhebrakov/homeenvcls:latest
+          links:
+              - rabbitmq
+          entrypoint: ./homeenvcls-entrypoint.sh
+          volumes:
+              - /home/gzhebrakov/Pictures/1/:/mnt/indexing/
+

@@ -79,7 +79,8 @@ public class ImageMetadataService {
 
                         messagingService.sendIndexingRequest(new IndexingRequest(
                                 maybeIndexedImage.getPath(),
-                                maybeIndexedImage.getHash()
+                                maybeIndexedImage.getHash(),
+                                applicationProperties.getIndexing().getPath()
                         ));
                         imageAttributes = extractMetadata(file);
                     } else {
