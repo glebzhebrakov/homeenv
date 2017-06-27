@@ -3,3 +3,9 @@ rabbitmq:
   ports:
     - "5672:5672"
     - "15672:15672"
+
+homeenvcls:
+        image: glebzhebrakov/homeenvcls:latest
+        links:
+            -  rabbitmq
+        entrypoint: ./homeenvcls-entrypoint.sh      
