@@ -1,4 +1,4 @@
-package com.homeenv.service;
+package com.homeenv.Interfaces.impl;
 
 import com.homeenv.Interfaces.IMimeTypeExtractor;
 import org.slf4j.Logger;
@@ -16,8 +16,7 @@ import java.util.Optional;
  */
 @Service
 public class MimeExtractor implements IMimeTypeExtractor {
-    @Autowired
-    Logger log;
+
 
     @Override
     public Optional<String> mimeExtract(File file) {
@@ -26,10 +25,9 @@ public class MimeExtractor implements IMimeTypeExtractor {
             String type = fileNameMap.getContentTypeFor(String.valueOf(file));
 
             return Optional.ofNullable(type);
-
-            //return Optional.ofNullable("image");
         } catch (Exception e) {
-            log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
+            e.printStackTrace();
+            //log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
         }
 
         return Optional.empty();

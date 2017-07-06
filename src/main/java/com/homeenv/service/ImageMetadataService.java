@@ -9,6 +9,10 @@ import com.drew.metadata.jpeg.JpegDirectory;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.Interfaces.IMimeTypeExtractor;
+import com.homeenv.Interfaces.impl.Extractor;
+import com.homeenv.Interfaces.impl.MimeExtractor;
+import com.homeenv.Interfaces.impl.MimeExtractorDefault;
+import com.homeenv.Interfaces.impl.MimeTypeExtractor;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
 import com.homeenv.domain.ImageAttribute;
@@ -45,20 +49,19 @@ public class ImageMetadataService {
 
     private final MessagingService messagingService;
 
-    private final IMimeTypeExtractor mimeExtractor;
+    private Extractor mimeExtractor = new MimeTypeExtractor(new MimeExtractorDefault()); //select mime detect realization
 
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,
                                 ImageRepository imageRepository,
                                 ImageDuplicateRepository imageDuplicateRepository,
                                 ImageAttributeRepository imageAttributeRepository,
-                                MessagingService messagingService, IMimeTypeExtractor mimeExtractor) {
+                                MessagingService messagingService) {
         this.applicationProperties = applicationProperties;
         this.imageRepository = imageRepository;
         this.imageDuplicateRepository = imageDuplicateRepository;
         this.imageAttributeRepository = imageAttributeRepository;
         this.messagingService = messagingService;
-        this.mimeExtractor = mimeExtractor;
     }
 
     public void indexStorage(){
@@ -67,7 +70,7 @@ public class ImageMetadataService {
                 applicationProperties.getIndexing().getRecursive());
 
         files.forEach( //file -> detectMimeType(file)
-                file-> mimeExtractor.mimeExtract(file)
+                file-> mimeExtractor.extractMimeType(file)
                  .ifPresent(mime -> {
           if (mime.startsWith("image")){
 
@@ -132,9 +135,6 @@ public class ImageMetadataService {
         return Optional.empty();
     }
 
-    private Optional<String> detectMimeType(IMimeTypeExtractor extractor){
-        return extractor.mimeExtract();
-    }
 
 /*    private Optional<String> detectMimeType(File file){
         try {

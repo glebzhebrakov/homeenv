@@ -1,4 +1,4 @@
-package com.homeenv.service;
+package com.homeenv.Interfaces.impl;
 
 import com.homeenv.Interfaces.IMimeTypeExtractor;
 import org.apache.tika.exception.TikaException;
@@ -34,7 +34,7 @@ public class MimeExtractorTika implements IMimeTypeExtractor {
             ParseContext parseContext = new ParseContext();
             Metadata metadata = new Metadata();
             metadata.set(Metadata.RESOURCE_NAME_KEY, file.getName());
-            Parser parser = new ExternalParser();
+            Parser parser = new AutoDetectParser();         //!!!!!!Exception
             parser.parse(fileInputStream, contentHandler, metadata, parseContext);
             return Optional.ofNullable(metadata.get(Metadata.CONTENT_TYPE));
         } catch (Exception e) {
