@@ -62,6 +62,10 @@ dependencies {
 //	providedRuntime group: 'org.jempbox', name: 'jempbox', version: '0.2.0'
 	compile("org.springframework.boot:spring-boot-starter-amqp")
 	compile("org.springframework.boot:spring-boot-configuration-processor")
+
+// https://mvnrepository.com/artifact/org.apache.tika/tika-core
+	compile group: 'org.apache.tika', name: 'tika-core', version: '1.15'
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
 }

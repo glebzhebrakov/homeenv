@@ -18,5 +18,5 @@ services:
               - rabbitmq
           entrypoint: ./homeenvcls-entrypoint.sh
           volumes:
-              - /home/gzhebrakov/Pictures/1/:/mnt/indexing/
+              - /Users/skhodukin/Pictures:/mnt/indexing/
 

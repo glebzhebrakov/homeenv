@@ -4,6 +4,7 @@ liquibase:
   url: jdbc:postgresql://localhost:5432/homeenv
   change-log: classpath:db/changelog/changelog-master.xml
 
+
 spring:
   application:
     name: homeenv
@@ -20,8 +21,10 @@ spring:
 #   password: homeenv
    host: localhost
    port: 5672
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 #   virtual-host: homeenv
-
 
 security:
   basic:
@@ -29,7 +32,7 @@ security:
 
 homeenv:
   indexing:
-    path: "/home/gzhebrakov/Pictures/1/"
+    path: "/Users/skhodukin/Pictures"
     recursive: true
 
   rabbit:

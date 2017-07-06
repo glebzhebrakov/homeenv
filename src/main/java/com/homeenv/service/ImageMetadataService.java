@@ -8,6 +8,7 @@ import com.drew.metadata.file.FileMetadataDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
+import com.homeenv.Interfaces.IMimeTypeExtractor;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
 import com.homeenv.domain.ImageAttribute;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+
 @Service
 public class ImageMetadataService {
 
@@ -43,17 +45,20 @@ public class ImageMetadataService {
 
     private final MessagingService messagingService;
 
+    private final IMimeTypeExtractor mimeExtractor;
+
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,
                                 ImageRepository imageRepository,
                                 ImageDuplicateRepository imageDuplicateRepository,
                                 ImageAttributeRepository imageAttributeRepository,
-                                MessagingService messagingService) {
+                                MessagingService messagingService, IMimeTypeExtractor mimeExtractor) {
         this.applicationProperties = applicationProperties;
         this.imageRepository = imageRepository;
         this.imageDuplicateRepository = imageDuplicateRepository;
         this.imageAttributeRepository = imageAttributeRepository;
         this.messagingService = messagingService;
+        this.mimeExtractor = mimeExtractor;
     }
 
     public void indexStorage(){
@@ -61,7 +66,9 @@ public class ImageMetadataService {
                 null,
                 applicationProperties.getIndexing().getRecursive());
 
-        files.forEach(file -> detectMimeType(file).ifPresent(mime -> {
+        files.forEach( //file -> detectMimeType(file)
+                file-> mimeExtractor.mimeExtract(file)
+                 .ifPresent(mime -> {
           if (mime.startsWith("image")){
 
               calculateHash(file).ifPresent(hash -> {
@@ -125,15 +132,24 @@ public class ImageMetadataService {
         return Optional.empty();
     }
 
-    private Optional<String> detectMimeType(File file){
+    private Optional<String> detectMimeType(IMimeTypeExtractor extractor){
+        return extractor.mimeExtract();
+    }
+
+/*    private Optional<String> detectMimeType(File file){
         try {
-            return Optional.of(java.nio.file.Files.probeContentType(file.toPath()));
+            FileNameMap fileNameMap = URLConnection.getFileNameMap();
+            String type = fileNameMap.getContentTypeFor(String.valueOf(file));
+
+            return Optional.ofNullable(type);
+
+            //return Optional.ofNullable("image");
         } catch (Exception e) {
             log.error("unable to detect mime type of file " + file.getAbsolutePath(), e);
         }
 
         return Optional.empty();
-    }
+    }*/
 
     private Set<ImageAttribute> extractMetadata(File file){
         Set<ImageAttribute> attributes = new HashSet<>();
