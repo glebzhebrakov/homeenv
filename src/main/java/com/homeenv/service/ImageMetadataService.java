@@ -9,10 +9,7 @@ import com.drew.metadata.jpeg.JpegDirectory;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.homeenv.Interfaces.IMimeTypeExtractor;
-import com.homeenv.Interfaces.impl.Extractor;
-import com.homeenv.Interfaces.impl.MimeExtractor;
-import com.homeenv.Interfaces.impl.MimeExtractorDefault;
-import com.homeenv.Interfaces.impl.MimeTypeExtractor;
+import com.homeenv.Interfaces.impl.*;
 import com.homeenv.config.ApplicationProperties;
 import com.homeenv.domain.Image;
 import com.homeenv.domain.ImageAttribute;
@@ -49,7 +46,7 @@ public class ImageMetadataService {
 
     private final MessagingService messagingService;
 
-    private Extractor mimeExtractor = new MimeTypeExtractor(new MimeExtractorDefault()); //select mime detect realization
+    private Extractor mimeExtractor = new MimeTypeExtractor(new MimeExtractorTika()); //select mime detect realization
 
     @Autowired
     public ImageMetadataService(ApplicationProperties applicationProperties,

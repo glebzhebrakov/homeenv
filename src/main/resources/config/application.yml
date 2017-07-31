@@ -21,9 +21,9 @@ spring:
 #   password: homeenv
    host: localhost
    port: 5672
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
+#  jpa:
+#    hibernate:
+#      ddl-auto: create-drop
 #   virtual-host: homeenv
 
 security:

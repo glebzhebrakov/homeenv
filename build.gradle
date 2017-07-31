@@ -64,7 +64,7 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-configuration-processor")
 
 // https://mvnrepository.com/artifact/org.apache.tika/tika-core
-	compile group: 'org.apache.tika', name: 'tika-core', version: '1.15'
+	compile group: 'org.apache.tika', name: 'tika-core', version: '1.16'
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
